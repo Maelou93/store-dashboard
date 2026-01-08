@@ -117,6 +117,12 @@ export const AddProductForm = () => {
     "43",
     "44",
     "45",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
   ];
   const couleurs = [
     { nom: "Noir", hex: "#000000" },
@@ -755,10 +761,22 @@ export const AddProductForm = () => {
                                   newVariants[index].stockZeroEnabled = checked;
                                   field.onChange(newVariants);
                                 }}
-                                className={variant.stockZeroEnabled ? "data-[state=checked]:bg-red-500" : ""}
+                                className={
+                                  variant.stockZeroEnabled
+                                    ? "data-[state=checked]:bg-red-500"
+                                    : ""
+                                }
                               />
-                              <span className={`text-xs ${variant.stockZeroEnabled ? "text-red-500 font-medium" : "text-gray-500"}`}>
-                                {variant.stockZeroEnabled ? "Activé" : "Désactivé"}
+                              <span
+                                className={`text-xs ${
+                                  variant.stockZeroEnabled
+                                    ? "text-red-500 font-medium"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {variant.stockZeroEnabled
+                                  ? "Activé"
+                                  : "Désactivé"}
                               </span>
                             </div>
                           </div>
