@@ -79,7 +79,7 @@ export function ImageUpload({
                       : "Limite d'upload atteinte"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    PNG, JPG, JPEG jusqu&#39;à 4MB
+                    PNG, JPG, JPEG, WebP, AVIF jusqu&#39;à 4MB
                   </p>
                 </div>
               </>

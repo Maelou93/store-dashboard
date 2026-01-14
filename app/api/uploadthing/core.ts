@@ -9,14 +9,10 @@ const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
   imageUploader: f({
-    image: {
-      /**
-       * For full list of options and defaults, see the File Route API reference
-       * @see https://docs.uploadthing.com/file-routes#route-config
-       */
-      maxFileSize: "4MB",
-      maxFileCount: 8, // Permettre jusqu'à 8 images
-    },
+    "image/png": { maxFileSize: "4MB", maxFileCount: 8 },
+    "image/jpeg": { maxFileSize: "4MB", maxFileCount: 8 },
+    "image/webp": { maxFileSize: "4MB", maxFileCount: 8 },
+    "image/avif": { maxFileSize: "4MB", maxFileCount: 8 },
   })
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
@@ -37,10 +33,10 @@ export const ourFileRouter = {
     
   // FileRoute for site images (homepage configuration)
   siteImages: f({
-    image: {
-      maxFileSize: "4MB",
-      maxFileCount: 1,
-    },
+    "image/png": { maxFileSize: "4MB", maxFileCount: 1 },
+    "image/jpeg": { maxFileSize: "4MB", maxFileCount: 1 },
+    "image/webp": { maxFileSize: "4MB", maxFileCount: 1 },
+    "image/avif": { maxFileSize: "4MB", maxFileCount: 1 },
   })
     .middleware(async ({ req }) => {
       // This code runs on your server before upload

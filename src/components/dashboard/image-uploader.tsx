@@ -146,7 +146,7 @@ export function ImageUploader({ value, onChange, label, description }: ImageUplo
         <ul className="ml-4 list-disc space-y-1">
           <li><strong>URL :</strong> Utilisez une URL complète ou un chemin /images/</li>
           <li><strong>Upload :</strong> Les images sont hébergées sur UploadThing</li>
-          <li><strong>Format :</strong> JPG, PNG, WebP recommandés</li>
+          <li><strong>Format :</strong> JPG, PNG, WebP, AVIF recommandés</li>
           <li><strong>Taille :</strong> Maximum 4MB</li>
         </ul>
       </div>
