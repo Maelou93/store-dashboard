@@ -47,6 +47,7 @@ const variantSchema = z.object({
   couleur: z.string().optional(),
   couleurHex: z.string().optional(),
   prix: z.string().optional(),
+  quantity: z.string().optional(),
   stockZeroEnabled: z.boolean().default(false),
   sku: z.string().optional(),
 });
@@ -746,6 +747,24 @@ export const AddProductForm = () => {
                                 </div>
                               </SelectContent>
                             </Select>
+                          </div>
+
+                          {/* Quantité */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                              Stock
+                            </label>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              value={variant.quantity || ""}
+                              onChange={(e) => {
+                                const newVariants = [...(field.value || [])];
+                                newVariants[index].quantity = e.target.value;
+                                field.onChange(newVariants);
+                              }}
+                            />
                           </div>
 
                           {/* Stock à 0 */}

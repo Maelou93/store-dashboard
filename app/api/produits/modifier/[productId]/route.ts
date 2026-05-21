@@ -12,6 +12,10 @@ const variantSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val ? parseFloat(val) : undefined)),
+  quantity: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val) : 0)),
   stockZeroEnabled: z.boolean().optional().default(false),
   sku: z.string().optional(),
 });
@@ -88,6 +92,7 @@ export async function POST(
             couleur: variant.couleur || null,
             couleurHex: variant.couleurHex || null,
             prix: variant.prix,
+            quantity: variant.quantity ?? 0,
             stockZeroEnabled: variant.stockZeroEnabled ?? false,
             sku: variant.sku || null,
           })),
