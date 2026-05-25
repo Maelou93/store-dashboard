@@ -49,9 +49,18 @@ const heroSchema = z.object({
   homepage_hero_button_text: z.string().min(1, "Le texte du bouton est requis"),
 });
 
+const categoryItemSchema = z.object({
+  image: z.string(),
+  nom: z.string(),
+  accroche: z.string(),
+  lien: z.string(),
+});
+
 const categoriesSchema = z.object({
-  category_homme_image: z.string(),
-  category_femme_image: z.string(),
+  category_1: categoryItemSchema,
+  category_2: categoryItemSchema,
+  category_3: categoryItemSchema,
+  category_4: categoryItemSchema,
 });
 
 const promoSchema = z.object({
@@ -68,9 +77,12 @@ const discountConfigSchema = z.object({
 
 type HeaderFormData = z.infer<typeof headerSchema>;
 type HeroFormData = z.infer<typeof heroSchema>;
+type CategoryItem = z.infer<typeof categoryItemSchema>;
 type CategoriesFormData = z.infer<typeof categoriesSchema>;
 type PromoFormData = z.infer<typeof promoSchema>;
 type DiscountConfigFormData = z.infer<typeof discountConfigSchema>;
+
+const EMPTY_CATEGORY: CategoryItem = { image: "", nom: "", accroche: "", lien: "" };
 
 export default function PersoForm() {
   const [isLoading, setIsLoading] = useState(true);
@@ -116,8 +128,10 @@ export default function PersoForm() {
   const categoriesForm = useForm<CategoriesFormData>({
     resolver: zodResolver(categoriesSchema),
     defaultValues: {
-      category_homme_image: "",
-      category_femme_image: "",
+      category_1: EMPTY_CATEGORY,
+      category_2: EMPTY_CATEGORY,
+      category_3: EMPTY_CATEGORY,
+      category_4: EMPTY_CATEGORY,
     },
   });
 
@@ -181,9 +195,19 @@ export default function PersoForm() {
         homepage_hero_button_text: configMap["homepage_hero_button_text"] || "",
       });
 
+      const parseCategory = (key: string): CategoryItem => {
+        try {
+          return JSON.parse(configMap[key] || "{}");
+        } catch {
+          return EMPTY_CATEGORY;
+        }
+      };
+
       categoriesForm.reset({
-        category_homme_image: configMap["category_homme_image"] || "",
-        category_femme_image: configMap["category_femme_image"] || "",
+        category_1: parseCategory("category_1"),
+        category_2: parseCategory("category_2"),
+        category_3: parseCategory("category_3"),
+        category_4: parseCategory("category_4"),
       });
 
       promoForm.reset({
@@ -261,18 +285,32 @@ export default function PersoForm() {
 
       // Categories Section
       {
-        key: "category_homme_image",
-        value: "",
-        type: "image",
+        key: "category_1",
+        value: JSON.stringify(EMPTY_CATEGORY),
+        type: "json",
         section: "categories",
-        description: "Image de la catégorie Homme",
+        description: "Catégorie 1",
       },
       {
-        key: "category_femme_image",
-        value: "",
-        type: "image",
+        key: "category_2",
+        value: JSON.stringify(EMPTY_CATEGORY),
+        type: "json",
         section: "categories",
-        description: "Image de la catégorie Femme",
+        description: "Catégorie 2",
+      },
+      {
+        key: "category_3",
+        value: JSON.stringify(EMPTY_CATEGORY),
+        type: "json",
+        section: "categories",
+        description: "Catégorie 3",
+      },
+      {
+        key: "category_4",
+        value: JSON.stringify(EMPTY_CATEGORY),
+        type: "json",
+        section: "categories",
+        description: "Catégorie 4",
       },
 
       // Promo Section
@@ -432,57 +470,59 @@ export default function PersoForm() {
     try {
       setIsUploading(true);
 
-      // Upload des images en attente
       const uploadMap = await uploadPendingImages();
 
-      // Mettre à jour les URLs dans les données avec les URLs uploadées
       const updatedData = { ...data };
+      ([1, 2, 3, 4] as const).forEach((n) => {
+        const key = `category_${n}` as keyof CategoriesFormData;
+        const pendingImg = pendingImages.find((img) =>
+          img.id.startsWith(`category_${n}_image`)
+        );
+        if (pendingImg && uploadMap[pendingImg.id]) {
+          updatedData[key] = { ...updatedData[key], image: uploadMap[pendingImg.id] };
+        }
+      });
 
-      // Pour category_homme_image
-      const pendingImgHomme = pendingImages.find((img) =>
-        img.id.startsWith("category_homme_image")
-      );
-      if (pendingImgHomme && uploadMap[pendingImgHomme.id]) {
-        updatedData.category_homme_image = uploadMap[pendingImgHomme.id];
-      }
-
-      // Pour category_femme_image
-      const pendingImgFemme = pendingImages.find((img) =>
-        img.id.startsWith("category_femme_image")
-      );
-      if (pendingImgFemme && uploadMap[pendingImgFemme.id]) {
-        updatedData.category_femme_image = uploadMap[pendingImgFemme.id];
-      }
-
-      const promises = Object.entries(updatedData).map(([key, value]) =>
-        fetch(`/api/site-config/${key}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            value,
-            type: key.includes("image") ? "image" : "text",
-            section: "categories",
-            description: getDescription(key),
-          }),
-        })
+      const promises = (["category_1", "category_2", "category_3", "category_4"] as const).map(
+        (key) =>
+          fetch(`/api/site-config/${key}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              value: JSON.stringify(updatedData[key]),
+              type: "json",
+              section: "categories",
+              description: `Catégorie ${key.split("_")[1]}`,
+            }),
+          }).then(async (res) => {
+            if (!res.ok) {
+              return fetch(`/api/site-config`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  key,
+                  value: JSON.stringify(updatedData[key]),
+                  type: "json",
+                  section: "categories",
+                  description: `Catégorie ${key.split("_")[1]}`,
+                }),
+              });
+            }
+            return res;
+          })
       );
 
       await Promise.all(promises);
-
-      // Nettoyer les images en attente
       clearPendingImages();
 
       toast.success("Section Catégories sauvegardée avec succès", {
         position: "top-center",
       });
 
-      // Recharger les configurations
       await loadConfigurations();
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
-      toast.error("Erreur lors de la sauvegarde", {
-        position: "top-center",
-      });
+      toast.error("Erreur lors de la sauvegarde", { position: "top-center" });
     } finally {
       setIsUploading(false);
     }
@@ -687,8 +727,10 @@ export default function PersoForm() {
       homepage_hero_title: "Titre principal de la page &#39;accueil",
       homepage_hero_subtitle: "Sous-titre de la page &#39;accueil",
       homepage_hero_button_text: "Texte du bouton",
-      category_homme_image: "Image de la catégorie Homme",
-      category_femme_image: "Image de la catégorie Femme",
+      category_1: "Catégorie 1",
+      category_2: "Catégorie 2",
+      category_3: "Catégorie 3",
+      category_4: "Catégorie 4",
       promo_section_image: "Image de fond de la section promotionnelle",
       promo_section_title: "Titre de la section vidéo",
       promo_section_description: "Description de la section vidéo",
@@ -922,68 +964,81 @@ export default function PersoForm() {
                 <CardHeader>
                   <CardTitle>Section Catégories</CardTitle>
                   <CardDescription>
-                    Configuration des catégories de produits
+                    4 catégories avec image, nom, texte d&#39;accroche et lien
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...categoriesForm}>
                     <form
-                      onSubmit={categoriesForm.handleSubmit(
-                        saveCategoriesSection
-                      )}
+                      onSubmit={categoriesForm.handleSubmit(saveCategoriesSection)}
                       className="space-y-6"
                     >
-                      {/* Catégories Homme et Femme */}
                       <div className="space-y-6">
-                        {/* Catégorie Homme */}
-                        <div className="border rounded-lg p-4 space-y-4">
-                          <h4 className="font-medium text-sm text-gray-700">
-                            Catégorie Homme
-                          </h4>
-                          <FormField
-                            control={categoriesForm.control}
-                            name="category_homme_image"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <UploadSiteImageDeferred
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    label="Image de la catégorie Homme"
-                                    description="Sélectionnez une image à uploader ou saisissez une URL directement"
-                                    imageKey="category_homme_image"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        {/* Catégorie Femme */}
-                        <div className="border rounded-lg p-4 space-y-4">
-                          <h4 className="font-medium text-sm text-gray-700">
-                            Catégorie Femme
-                          </h4>
-                          <FormField
-                            control={categoriesForm.control}
-                            name="category_femme_image"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <UploadSiteImageDeferred
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    label="Image de la catégorie Femme"
-                                    description="Sélectionnez une image à uploader ou saisissez une URL directement"
-                                    imageKey="category_femme_image"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        {([1, 2, 3, 4] as const).map((n) => {
+                          const key = `category_${n}` as `category_${typeof n}`;
+                          return (
+                            <div key={n} className="border rounded-lg p-4 space-y-4">
+                              <h4 className="font-medium text-sm">Catégorie {n}</h4>
+                              <FormField
+                                control={categoriesForm.control}
+                                name={`${key}.image`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <UploadSiteImageDeferred
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        label="Image"
+                                        description="Recommandé : 600 x 800 px"
+                                        imageKey={`category_${n}_image`}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={categoriesForm.control}
+                                name={`${key}.nom`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Nom</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Ex: Homme, Femme, Enfant..." />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={categoriesForm.control}
+                                name={`${key}.accroche`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Texte d&#39;accroche</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Ex: Nouvelle collection printemps" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={categoriesForm.control}
+                                name={`${key}.lien`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Lien</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Ex: /collections/homme" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
 
                       <Button
