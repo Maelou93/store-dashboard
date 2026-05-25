@@ -196,7 +196,8 @@ export default function PersoForm() {
 
       const parseCategory = (key: string): CategoryItem => {
         try {
-          return JSON.parse(configMap[key] || "{}");
+          const parsed = JSON.parse(configMap[key] || "{}");
+          return { ...EMPTY_CATEGORY, ...parsed };
         } catch {
           return EMPTY_CATEGORY;
         }
