@@ -52,7 +52,6 @@ const heroSchema = z.object({
 const categoryItemSchema = z.object({
   image: z.string(),
   nom: z.string(),
-  accroche: z.string(),
   lien: z.string(),
 });
 
@@ -82,7 +81,7 @@ type CategoriesFormData = z.infer<typeof categoriesSchema>;
 type PromoFormData = z.infer<typeof promoSchema>;
 type DiscountConfigFormData = z.infer<typeof discountConfigSchema>;
 
-const EMPTY_CATEGORY: CategoryItem = { image: "", nom: "", accroche: "", lien: "" };
+const EMPTY_CATEGORY: CategoryItem = { image: "", nom: "", lien: "" };
 
 export default function PersoForm() {
   const [isLoading, setIsLoading] = useState(true);
@@ -964,7 +963,7 @@ export default function PersoForm() {
                 <CardHeader>
                   <CardTitle>Section Catégories</CardTitle>
                   <CardDescription>
-                    4 catégories avec image, nom, texte d&#39;accroche et lien
+                    4 catégories avec image, nom et lien
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1005,19 +1004,6 @@ export default function PersoForm() {
                                     <FormLabel>Nom</FormLabel>
                                     <FormControl>
                                       <Input {...field} placeholder="Ex: Homme, Femme, Enfant..." />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={categoriesForm.control}
-                                name={`${key}.accroche`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Texte d&#39;accroche</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} placeholder="Ex: Nouvelle collection printemps" />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
