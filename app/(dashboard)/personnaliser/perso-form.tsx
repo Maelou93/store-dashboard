@@ -50,10 +50,10 @@ const heroSchema = z.object({
 });
 
 const categoryItemSchema = z.object({
-  image: z.string().or(z.undefined()).transform((v) => v ?? ""),
-  nom: z.string().or(z.undefined()).transform((v) => v ?? ""),
-  accroche: z.string().or(z.undefined()).transform((v) => v ?? ""),
-  lien: z.string().or(z.undefined()).transform((v) => v ?? ""),
+  image: z.string(),
+  nom: z.string(),
+  accroche: z.string(),
+  lien: z.string(),
 });
 
 const categoriesSchema = z.object({
@@ -125,7 +125,7 @@ export default function PersoForm() {
     },
   });
 
-  const categoriesForm = useForm<CategoriesFormData>({
+  const categoriesForm = useForm({
     resolver: zodResolver(categoriesSchema),
     defaultValues: {
       category_1: EMPTY_CATEGORY,
