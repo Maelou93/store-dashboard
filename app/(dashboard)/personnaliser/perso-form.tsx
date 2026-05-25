@@ -50,10 +50,10 @@ const heroSchema = z.object({
 });
 
 const categoryItemSchema = z.object({
-  image: z.string(),
-  nom: z.string(),
-  accroche: z.string(),
-  lien: z.string(),
+  image: z.string().optional().default(""),
+  nom: z.string().optional().default(""),
+  accroche: z.string().optional().default(""),
+  lien: z.string().optional().default(""),
 });
 
 const categoriesSchema = z.object({
