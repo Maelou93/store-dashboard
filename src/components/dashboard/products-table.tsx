@@ -513,6 +513,12 @@ export function ProductsTable({ data }: ProductsTableProps) {
                     pc.collection.slug === "best-sellers" ||
                     pc.collection.nom.toLowerCase().includes("best")
                 );
+                const hasNouveautes = product.collections.some(
+                  (pc) =>
+                    pc.collection.slug === "nouveautes" ||
+                    pc.collection.nom.toLowerCase().includes("nouveauté") ||
+                    pc.collection.nom.toLowerCase().includes("nouveautes")
+                );
                 const hasReduction =
                   product.prixReduit != null && product.prixReduit > 0;
 
@@ -577,6 +583,11 @@ export function ProductsTable({ data }: ProductsTableProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
+                        {hasNouveautes && (
+                          <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full">
+                            N
+                          </span>
+                        )}
                         {hasBestSellersCollection && (
                           <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full">
                             B
